@@ -1,0 +1,6 @@
+[project]
+name = "quadrashop"
+version = "0.1.0"
+
+[tool.vercel]
+entrypoint = "services.api_gateway.main:app"
