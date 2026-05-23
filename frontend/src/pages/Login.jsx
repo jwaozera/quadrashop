@@ -106,23 +106,23 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-[var(--bg-base)]">
         <div className="w-full max-w-[400px]">
           {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
+          <div className="lg:hidden text-center mb-10">
             <h1 className="font-['DM_Sans'] text-[28px] font-semibold text-[var(--text-primary)]">
               Quadra<span className="text-[var(--brand)]">Shop</span>
               <span className="text-[var(--brand)]">.</span>
             </h1>
           </div>
 
-          <div className="mb-8">
+          <div className="mb-10">
             <h2 className="font-['DM_Sans'] text-[28px] font-semibold text-[var(--text-primary)]">
               Bem-vindo de volta
             </h2>
-            <p className="text-[14px] text-[var(--text-secondary)] mt-2">
+            <p className="text-[14px] text-[var(--text-secondary)] mt-2 mb-8">
               Entre com sua conta para continuar
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <Input
               type="email"
               label="Email"
@@ -150,12 +150,14 @@ export default function Login() {
               </div>
             )}
 
-            <Button type="submit" fullWidth loading={loading}>
-              Entrar
-            </Button>
+            <div className="pt-2">
+              <Button type="submit" fullWidth loading={loading}>
+                Entrar
+              </Button>
+            </div>
           </form>
 
-          <div className="relative my-6">
+          <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-[var(--border-subtle)]" />
             </div>
