@@ -16,25 +16,18 @@ RECOMMENDATION_RULES = {
     3: [{"id": 6, "name": "Suporte para Fone", "price": 80.00, "category": "Eletronicos", "reason": "Organize seu setup"}],
     4: [{"id": 7, "name": "Suporte Articulado", "price": 250.00, "category": "Casa", "reason": "Ergonomia para seu Monitor"}]
 }
-
+@app.get("/")
 @app.get("/recommendations")
 def get_recommendations():
-    """
-    Retorna recomendações gerais para a home.
-    """
     return DEFAULT_RECOMMENDATIONS
 
+@app.get("/{product_id}")
 @app.get("/recommendations/{product_id}")
 def get_recommendations_for_product(product_id: int):
-    """
-    Retorna uma lista de produtos recomendados com base no produto que o usuário
-    está visualizando no momento. Atende ao requisito de sistema de recomendação.
-    """
-    # Verifica se temos regras específicas mapeadas para este produto
+
     if product_id in RECOMMENDATION_RULES:
         return RECOMMENDATION_RULES[product_id]
 
-    # Se não houver regra específica, sugere serviços genéricos padrão
     return [
         {"id": 99, "name": "Garantia Estendida de 12 Meses", "price": 120.00, "category": "Acessorios", "reason": "Mais segurança para sua compra"},
         {"id": 100, "name": "Frete Expresso", "price": 35.00, "category": "Acessorios", "reason": "Receba amanhã na sua casa"}
