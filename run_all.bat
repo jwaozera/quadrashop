@@ -20,4 +20,4 @@ start "API Gateway" /D "%ROOT%" cmd /k "python -m uvicorn services.api_gateway.m
 REM Inicia o frontend com a variável Vite necessária
 start "Frontend" /D "%ROOT%\frontend" cmd /k "set VITE_API_BASE_URL=%VITE_API_BASE_URL% && npm install && npm run dev -- --host 0.0.0.0"
 
-echo Janelas abertas! Mantenha elas minimizadas enquanto roda o teste.
+echo Janelas abertas! Mantenha elas minimizadas enquanto roda o teste
