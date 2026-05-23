@@ -25,7 +25,8 @@ SERVICES = {
     "catalog": "http://localhost:8002",
     "orders": "http://localhost:8003",
     "payment": "http://localhost:8004",
-    "recommendation": "http://localhost:8005"
+    "recommendation": "http://localhost:8005",
+    "recommendations": "http://localhost:8005",
 }
 
 # Rotas que não precisam de login (Qualquer um pode acessar)

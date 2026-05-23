@@ -1,8 +1,8 @@
 import sqlite3
 import jwt
 import datetime
-import bcrypt  # Import direto da biblioteca nativa
-from fastapi import FastAPI, HTTPException
+import bcrypt
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
 
@@ -18,7 +18,6 @@ def get_db_connection():
     conn.execute("PRAGMA busy_timeout=5000")
     return conn
 
-# Inicialização do Banco de Dados SQLite
 def init_db():
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -47,20 +46,37 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+
+@app.get("/me")
+def get_me(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token ausente.")
+
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return {
+            "id": payload.get("user_id"),
+            "name": payload.get("name"),
+            "email": payload.get("email"),
+        }
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expirado.")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Token inválido.")
+
+
 @app.post("/register")
 def register(user: UserCreate):
-    """
-    Registra um novo usuário com a senha codificada nativamente em bcrypt.
-    """
-    # Transforma a string da senha em bytes e gera o hash seguro
     password_bytes = user.password.encode('utf-8')
     hashed_password = bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode('utf-8')
-    
+
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)", 
+                "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
                 (user.name, user.email, hashed_password)
             )
             user_id = cursor.lastrowid
@@ -79,16 +95,14 @@ def register(user: UserCreate):
                     "id": user_id,
                     "name": user.name,
                     "email": user.email,
-                },
-            },
+                }
+            }
     except sqlite3.IntegrityError:
         raise HTTPException(status_code=400, detail="E-mail já cadastrado.")
 
+
 @app.post("/login")
 def login(user: UserLogin):
-    """
-    Valida as credenciais comparando os bytes das senhas.
-    """
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT id, name, password_hash FROM users WHERE email = ?", (user.email,))
@@ -97,14 +111,12 @@ def login(user: UserLogin):
     if not db_user:
         raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
 
-    # Converte os formatos para checagem em bytes nativa do bcrypt
     password_bytes = user.password.encode('utf-8')
     db_password_bytes = db_user[2].encode('utf-8')
 
     if not bcrypt.checkpw(password_bytes, db_password_bytes):
         raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
 
-    # Gera o Token JWT se a senha bater
     payload = {
         "user_id": db_user[0],
         "email": user.email,
@@ -112,7 +124,7 @@ def login(user: UserLogin):
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-    
+
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -122,6 +134,7 @@ def login(user: UserLogin):
             "email": user.email,
         },
     }
+
 
 if __name__ == "__main__":
     import uvicorn

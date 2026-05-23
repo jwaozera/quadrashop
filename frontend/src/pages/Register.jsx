@@ -1,53 +1,61 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, AlertCircle, Zap, Shield, Truck } from 'lucide-react';
-import { register as registerApi } from '../api/auth';
-import { useAuth } from '../hooks/useAuth';
-import { useToast } from '../hooks/useToast';
-import { validateEmail, validatePassword } from '../utils/format';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Mail,
+  Lock,
+  User,
+  AlertCircle,
+  Zap,
+  Shield,
+  Truck,
+} from "lucide-react";
+import { register as registerApi } from "../api/auth";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/useToast";
+import { validateEmail, validatePassword } from "../utils/format";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 
 const features = [
-  { icon: Zap, text: 'Compras rápidas e seguras' },
-  { icon: Shield, text: 'Proteção de dados garantida' },
-  { icon: Truck, text: 'Entrega em todo o Brasil' },
+  { icon: Zap, text: "Compras rápidas e seguras" },
+  { icon: Shield, text: "Proteção de dados garantida" },
+  { icon: Truck, text: "Entrega em todo o Brasil" },
 ];
 
 export default function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { error: showError, success } = useToast();
-  
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
-  const [apiError, setApiError] = useState('');
+  const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) {
-      newErrors.name = 'Nome é obrigatório';
+      newErrors.name = "Nome é obrigatório";
     }
     if (!formData.email) {
-      newErrors.email = 'Email é obrigatório';
+      newErrors.email = "Email é obrigatório";
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'Email inválido';
+      newErrors.email = "Email inválido";
     }
     if (!formData.password) {
-      newErrors.password = 'Senha é obrigatória';
+      newErrors.password = "Senha é obrigatória";
     } else if (!validatePassword(formData.password)) {
-      newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
+      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
     }
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirme sua senha';
+      newErrors.confirmPassword = "Confirme sua senha";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'As senhas não coincidem';
+      newErrors.confirmPassword = "As senhas não coincidem";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -55,18 +63,43 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setApiError('');
-    
+    setApiError("");
+
     if (!validate()) return;
 
     setLoading(true);
     try {
-      const response = await registerApi(formData.name, formData.email, formData.password);
+      const response = await registerApi(
+        formData.name,
+        formData.email,
+        formData.password,
+      );
       login(response.access_token, response.user);
-      success('Conta criada com sucesso!');
-      navigate('/');
+      success("Conta criada com sucesso!");
+      navigate("/");
     } catch (err) {
-      const message = err.response?.data?.detail || 'Erro ao criar conta. Tente novamente.';
+      // Mensagem de erro mais robusta: aceita detail como string, lista de erros, ou objeto
+      const data = err.response?.data;
+      let message = "Erro ao criar conta. Tente novamente.";
+      if (data) {
+        if (data.detail) {
+          if (Array.isArray(data.detail)) {
+            // FastAPI retorna lista de erros de validação
+            message = data.detail.map((d) => d.msg || d).join(" | ");
+          } else {
+            message = data.detail;
+          }
+        } else if (typeof data === "string") {
+          message = data;
+        } else {
+          try {
+            message = JSON.stringify(data);
+          } catch (_e) {
+            message = String(data);
+          }
+        }
+      }
+
       setApiError(message);
       showError(message);
     } finally {
@@ -75,22 +108,25 @@ export default function Register() {
   };
 
   const handleChange = (field) => (e) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
-    if (apiError) setApiError('');
+    if (apiError) setApiError("");
   };
 
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Branding (Desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 bg-[var(--bg-muted)] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `radial-gradient(circle, var(--text-primary) 1px, transparent 1px)`,
-          backgroundSize: '24px 24px'
-        }} />
-        
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `radial-gradient(circle, var(--text-primary) 1px, transparent 1px)`,
+            backgroundSize: "24px 24px",
+          }}
+        />
+
         <div className="relative z-10 flex flex-col justify-center px-16">
           <div className="mb-8">
             <h1 className="font-['DM_Sans'] text-[36px] font-semibold text-[var(--text-primary)]">
@@ -108,7 +144,9 @@ export default function Register() {
                 <div className="w-10 h-10 bg-[var(--brand-light)] rounded-[var(--radius-md)] flex items-center justify-center">
                   <Icon className="w-5 h-5 text-[var(--brand)]" />
                 </div>
-                <span className="text-[14px] text-[var(--text-secondary)]">{text}</span>
+                <span className="text-[14px] text-[var(--text-secondary)]">
+                  {text}
+                </span>
               </div>
             ))}
           </div>
@@ -141,7 +179,7 @@ export default function Register() {
               label="Nome completo"
               icon={User}
               value={formData.name}
-              onChange={handleChange('name')}
+              onChange={handleChange("name")}
               error={errors.name}
               autoComplete="name"
             />
@@ -151,7 +189,7 @@ export default function Register() {
               label="Email"
               icon={Mail}
               value={formData.email}
-              onChange={handleChange('email')}
+              onChange={handleChange("email")}
               error={errors.email}
               autoComplete="email"
             />
@@ -161,7 +199,7 @@ export default function Register() {
               label="Senha"
               icon={Lock}
               value={formData.password}
-              onChange={handleChange('password')}
+              onChange={handleChange("password")}
               error={errors.password}
               autoComplete="new-password"
             />
@@ -171,7 +209,7 @@ export default function Register() {
               label="Confirmar senha"
               icon={Lock}
               value={formData.confirmPassword}
-              onChange={handleChange('confirmPassword')}
+              onChange={handleChange("confirmPassword")}
               error={errors.confirmPassword}
               autoComplete="new-password"
             />
@@ -179,7 +217,9 @@ export default function Register() {
             {apiError && (
               <div className="flex items-center gap-2 p-3 bg-red-50 border border-[var(--error)] rounded-[var(--radius-md)]">
                 <AlertCircle className="w-4 h-4 text-[var(--error)] shrink-0" />
-                <span className="text-[13px] text-[var(--error)]">{apiError}</span>
+                <span className="text-[13px] text-[var(--error)]">
+                  {apiError}
+                </span>
               </div>
             )}
 
@@ -200,7 +240,7 @@ export default function Register() {
           </div>
 
           <p className="text-center text-[14px] text-[var(--text-secondary)]">
-            Já tem uma conta?{' '}
+            Já tem uma conta?{" "}
             <Link
               to="/login"
               className="text-[var(--brand)] font-medium hover:underline"
