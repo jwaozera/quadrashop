@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - api-gateway
+
+  api-gateway:
+    build: ./services/api_gateway
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+  auth-service:
+    build: ./services/auth_service
+    ports:
+      - "8001:8001"
+    command: uvicorn main:app --host 0.0.0.0 --port 8001
+
+  catalog-service:
+    build: ./services/catalog_service
+    ports:
+      - "8002:8002"
+    command: uvicorn main:app --host 0.0.0.0 --port 8002
+
+  order-service:
+    build: ./services/order_service
+    ports:
+      - "8003:8003"
+    command: uvicorn main:app --host 0.0.0.0 --port 8003
+
+  payment-service:
+    build: ./services/payment_service
+    ports:
+      - "8004:8004"
+    command: uvicorn main:app --host 0.0.0.0 --port 8004
+
+  recommendation-service:
+    build: ./services/recommendation_service
+    ports:
+      - "8005:8005"
+    command: uvicorn main:app --host 0.0.0.0 --port 8005
