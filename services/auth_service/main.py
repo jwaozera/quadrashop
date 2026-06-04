@@ -2,18 +2,21 @@ import sqlite3
 import jwt
 import datetime
 import bcrypt
+import os
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
 
 app = FastAPI(title="Auth Service - E-Commerce", version="1.0.1")
 
-SECRET_KEY = "chave_super_secreta_do_projeto_com_tamanho_seguro_32+"
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "chave_super_secreta_do_projeto_com_tamanho_seguro_32+")
 ALGORITHM = "HS256"
+
+DB_PATH = os.getenv("DB_PATH", "users.db")
 
 
 def get_db_connection():
-    conn = sqlite3.connect("users.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA busy_timeout=5000")
     return conn

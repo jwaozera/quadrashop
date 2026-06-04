@@ -1,9 +1,12 @@
 import sqlite3
+import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 
 app = FastAPI(title="Catalog Service - E-Commerce", version="1.0.0")
+
+DB_PATH = os.getenv("DB_PATH", "catalog.db")
 
 # Inicialização do Banco de Dados SQLite
 def init_db():
@@ -11,7 +14,7 @@ def init_db():
     Cria a tabela de produtos e insere dados iniciais (mock) 
     para facilitar os testes da vitrine do E-commerce.
     """
-    conn = sqlite3.connect("catalog.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS products (
@@ -53,7 +56,7 @@ def get_all_products():
     """
     Retorna a lista de todos os produtos disponíveis no catálogo.
     """
-    conn = sqlite3.connect("catalog.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products")
     products = cursor.fetchall()
@@ -73,7 +76,7 @@ def get_product_by_id(product_id: int):
     """
     Busca os detalhes de um produto específico pelo seu ID.
     """
-    conn = sqlite3.connect("catalog.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
     p = cursor.fetchone()
@@ -93,7 +96,7 @@ def reduce_stock(product_id: int, quantity: int):
     Reduz o estoque de um produto. Será chamado pelo Order Service 
     quando uma compra for finalizada.
     """
-    conn = sqlite3.connect("catalog.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
     cursor.execute("SELECT stock FROM products WHERE id = ?", (product_id,))

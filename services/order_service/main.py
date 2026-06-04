@@ -2,6 +2,7 @@ import sqlite3
 import httpx
 import json
 import datetime
+import os
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -9,9 +10,9 @@ from pydantic import BaseModel
 app = FastAPI(title="Order Service - E-Commerce", version="1.0.0")
 
 # URL do Catalog Service para comunicação interna
-CATALOG_SERVICE_URL = "http://localhost:8002"
+CATALOG_SERVICE_URL = os.getenv("CATALOG_SERVICE_URL", "http://localhost:8002")
 
-DB_PATH = "orders_v2.db"
+DB_PATH = os.getenv("DB_PATH", "orders_v2.db")
 
 # Inicialização do Banco de Dados SQLite do Serviço de Pedidos
 def init_db():

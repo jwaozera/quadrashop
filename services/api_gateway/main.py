@@ -21,12 +21,12 @@ app.add_middleware(
 )
 
 SERVICES = {
-    "auth": "http://localhost:8001",
-    "catalog": "http://localhost:8002",
-    "orders": "http://localhost:8003",
-    "payment": "http://localhost:8004",
-    "recommendation": "http://localhost:8005",
-    "recommendations": "http://localhost:8005",
+    "auth": os.getenv("AUTH_SERVICE_URL", "http://localhost:8001"),
+    "catalog": os.getenv("CATALOG_SERVICE_URL", "http://localhost:8002"),
+    "orders": os.getenv("ORDERS_SERVICE_URL", "http://localhost:8003"),
+    "payment": os.getenv("PAYMENT_SERVICE_URL", "http://localhost:8004"),
+    "recommendation": os.getenv("RECOMMENDATION_SERVICE_URL", "http://localhost:8005"),
+    "recommendations": os.getenv("RECOMMENDATION_SERVICE_URL", "http://localhost:8005"),
 }
 
 # Rotas que não precisam de login (Qualquer um pode acessar)
